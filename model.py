@@ -14,3 +14,41 @@ class User:
 
     def set_password(self, password):
         self.__password = password
+
+class Student:
+    def __init__(self, fullname, id, dob, absent_count, atttedance):
+        self.__fullname = fullname
+        self.__id = id
+        self.__dob = dob
+        self.__absent_count = absent_count
+        self.__atttedance = atttedance
+
+    def get_fullname(self):
+        return self.__fullname
+    
+    def get_id(self):
+        return self.__id
+
+    def get_dob(self):
+        return self.__dob
+    
+    def get_absent_count(self):
+        return self.__absent_count
+
+    def get_atttedance(self):
+        return self.__atttedance
+
+    def set_fullname(self, fullname):
+        self.__fullname = fullname
+
+    def set_id(self, id):
+        self.__id = id
+    
+    def set_dob(self, dob):
+        self.__dob = dob
+
+    def set_absent_count(self, absent_count):
+        self.__absent_count = absent_count
+
+    def set_atttedance(self, atttedance):
+        self.__atttedance = atttedance

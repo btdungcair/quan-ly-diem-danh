@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from PIL import ImageTk, Image
-from controller import login
+from controller import *
 
 class LoginFrame(Frame):
     def __init__(self, master):
@@ -28,7 +28,7 @@ class LoginFrame(Frame):
         self.password_entry = Entry(self.canvas1, width=25, font=("Arial", 12), background="#C4C4C4", show="*")
         self.password_entry.place(x=320, y=240)
 
-        self.login_button = Button(self.canvas1, text="Đăng nhập", height=1, width=15, font=("Arial", 15), background="#F32463", foreground="white", command=login)
+        self.login_button = Button(self.canvas1, text="Đăng nhập", height=1, width=15, font=("Arial", 15), background="#F32463", foreground="white", command=self.login)
         self.login_button.place(x=345, y=285)
 
         self.master.bind("<Return>", self.login)
@@ -36,7 +36,7 @@ class LoginFrame(Frame):
     def login(self, event=None):
         username = self.username_entry.get()
         password = self.password_entry.get()
-        if login.check_login(username, password):
+        if check_login(username, password):
             self.destroy()
             MenuFrame(self.master).tkraise()
         else:
@@ -92,17 +92,52 @@ class MenuFrame(ParentFrame):
     def create_widgets(self):
         super().create_widgets()
         self.student_button_icon = ImageTk.PhotoImage(Image.open("images/button_sinhvien.png"))
-        self.student_button = Button(self.canvas1, image=self.student_button_icon, highlightthickness=0, bd=0, borderwidth=0)
+        self.student_button = Button(self.canvas1, image=self.student_button_icon, highlightthickness=0, bd=0, borderwidth=0, command=lambda: self.switch_frame("student_frame"))
         self.student_button.place(x=60, y=180)
 
         self.face_recognition_button_icon = ImageTk.PhotoImage(Image.open("images/button_nhandien.png"))
-        self.face_recognition_button = Button(self.canvas1, image=self.face_recognition_button_icon, highlightthickness=0, bd=0, borderwidth=0)
+        self.face_recognition_button = Button(self.canvas1, image=self.face_recognition_button_icon, highlightthickness=0, bd=0, borderwidth=0, command=lambda: self.switch_frame("face_recognition_frame"))
         self.face_recognition_button.place(x=210, y=180)
 
         self.attendance_button_icon = ImageTk.PhotoImage(Image.open("images/button_diemdanh.png"))
-        self.attendance_button = Button(self.canvas1, image=self.attendance_button_icon, highlightthickness=0, bd=0, borderwidth=0)
+        self.attendance_button = Button(self.canvas1, image=self.attendance_button_icon, highlightthickness=0, bd=0, borderwidth=0, command=lambda: self.switch_frame("attendance_frame"))
         self.attendance_button.place(x=360, y=180)
 
         self.statistical_button_icon = ImageTk.PhotoImage(Image.open("images/button_thongke.png"))
-        self.statistical_button = Button(self.canvas1, image=self.statistical_button_icon, highlightthickness=0, bd=0, borderwidth=0)
+        self.statistical_button = Button(self.canvas1, image=self.statistical_button_icon, highlightthickness=0, bd=0, borderwidth=0, command=lambda: self.switch_frame("statistical_frame"))
         self.statistical_button.place(x=510, y=180)
+
+    def switch_frame(self, frame_name):
+        if frame_name == "statistical_frame":
+            self.destroy()
+            StatisticalFrame(self.master).tkraise()
+        elif frame_name == "student_frame":
+            self.destroy()
+            StudentFrame(self.master).tkraise()
+        else:
+            return
+
+class StudentFrame(ParentFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.pack(side=TOP, fill="both", expand=True)
+        self.create_widgets()
+    
+    def create_widgets(self):
+        return super().create_widgets()
+
+class StatisticalFrame(ParentFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.pack(side=TOP, fill="both", expand=True)
+        self.create_widgets()
+
+    def create_widgets(self):
+        super().create_widgets()
+
+        columns = ['STT', 'Họ và tên', 'Mã sinh viên', 'Ngày sinh']
+
+        self.canvas1.create_rectangle(50, 300, 650, 330, fill="#D1D1D1", outline="#D1D1D1")
+        self.canvas1.create_text(360, 315, text="Tổng kết điểm danh sinh viên", font=("Arial", 15), fill="black")
+        self.export_file_button = Button(self.canvas1, text="Xuất file", height=1, width=8, font=("Arial", 12), background="#E3C317", foreground="black")
+        self.export_file_button.place(x=320, y=340)
