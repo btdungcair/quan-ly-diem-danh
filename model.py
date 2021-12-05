@@ -16,9 +16,10 @@ class User:
         self.__password = password
 
 class Student:
-    def __init__(self, fullname, id, dob, absent_count, atttedance):
+    def __init__(self, fullname, id, gender, dob, absent_count, atttedance):
         self.__fullname = fullname
         self.__id = id
+        self.__gender = gender
         self.__dob = dob
         self.__absent_count = absent_count
         self.__atttedance = atttedance
@@ -28,6 +29,9 @@ class Student:
     
     def get_id(self):
         return self.__id
+
+    def get_gender(self):
+        return self.__gender
 
     def get_dob(self):
         return self.__dob
@@ -43,6 +47,9 @@ class Student:
 
     def set_id(self, id):
         self.__id = id
+
+    def set_gender(self, gender):
+        self.__gender = gender
     
     def set_dob(self, dob):
         self.__dob = dob

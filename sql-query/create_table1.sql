@@ -7,6 +7,7 @@ drop table if exists attendance;
 create table students(
     id integer primary key not null,
     fullname text not null,
+    gender text not null,
     dob text not null,
     absent_count integer default 0
 );
