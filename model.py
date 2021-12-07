@@ -16,7 +16,7 @@ class User:
         self.__password = password
 
 class Student:
-    def __init__(self, fullname, id, gender, dob, absent_count, atttedance):
+    def __init__(self, fullname, id, gender, dob, absent_count, atttedance=None):
         self.__fullname = fullname
         self.__id = id
         self.__gender = gender

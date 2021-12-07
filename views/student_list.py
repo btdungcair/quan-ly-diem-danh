@@ -4,6 +4,7 @@ from tkinter import ttk
 from views import base, student_info
 from PIL import ImageTk, Image
 from controller import *
+from model import Student
 
 class StudentListFrame(base.ParentFrame):
     def __init__(self, master):
@@ -26,6 +27,7 @@ class StudentListFrame(base.ParentFrame):
         self.value_entry = Entry(self.canvas1, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
         self.value_entry.insert(0, "Nhập giá trị")
         self.value_entry.bind("<Button-1>", self.clear_entry)
+        self.value_entry.bind("<Return>", self.search)
         self.value_entry.place(x=340, y=75)
 
         self.search_button_icon = ImageTk.PhotoImage(Image.open("images/search.png"))
@@ -67,7 +69,7 @@ class StudentListFrame(base.ParentFrame):
         if self.value_entry.get() == "Nhập giá trị":
             self.value_entry.delete(0, END)
 
-    def search(self):
+    def search(self, event):
         attribute = self.attribute_choosen.current()
         value = self.value_entry.get()
         selections = []
@@ -76,7 +78,6 @@ class StudentListFrame(base.ParentFrame):
                 if value.lower() in str(self.table.item(child)['values'][attribute]).lower():
                     selections.append(child)
             self.table.selection_set(selections)
-            print(selections)
 
     def insert_data(self):
         student_list = sort_by_name(get_students_list())
@@ -185,6 +186,7 @@ class StudentListFrame(base.ParentFrame):
             modify_button.place(x=300, y=178)
 
     def show_student_info(self, event):
-        student = self.selected_student()
+        info = self.selected_student()
+        selected_student = Student(info[1], info[2], info[3], info[4], info[5])
         self.destroy()
-        student_info.StudentInfoFrame(self.master, student).tkraise()
+        student_info.StudentInfoFrame(self.master, selected_student).tkraise()
