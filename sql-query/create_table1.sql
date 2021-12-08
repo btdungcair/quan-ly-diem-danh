@@ -9,7 +9,8 @@ create table students(
     fullname text not null,
     gender text not null,
     dob text not null,
-    absent_count integer default 0
+    absent_count integer default 0,
+    image blob
 );
 
 create table dates(

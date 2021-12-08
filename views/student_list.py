@@ -1,10 +1,9 @@
 from tkinter import *
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import messagebox, ttk, filedialog
 from views import base, student_info
 from PIL import ImageTk, Image
 from controller import *
-from model import Student
+from helper import image_to_octet_string
 
 class StudentListFrame(base.ParentFrame):
     def __init__(self, master):
@@ -14,62 +13,63 @@ class StudentListFrame(base.ParentFrame):
     
     def create_widgets(self):
         super().create_widgets()
-        self.attributes_set = ("STT", "Họ và tên", "Mã SV", "GT", "Ngày sinh", "Số tiết vắng")
-        self.canvas1.create_text(150, 85, text="Tìm kiếm theo", font=("Arial", 12), fill="black")
+
+        self.attributes_set = ("STT", "Họ và tên", "Mã SV", "Giới tính", "Ngày sinh", "Số tiết vắng")
+        self.canvas1.create_text(350, 180, text="Tìm kiếm theo", font=("Arial", 18), fill="black")
 
         self.variable = StringVar(self.canvas1)
         self.variable.set("Thuộc tính")
-        self.attribute_choosen = ttk.Combobox(self.canvas1, textvariable=self.variable, state="readonly", width=11)
+        self.attribute_choosen = ttk.Combobox(self.canvas1, textvariable=self.variable, state="readonly", width=11, font=("Arial", 16))
         self.attribute_choosen["values"] = self.attributes_set
         self.attribute_choosen.current()
-        self.attribute_choosen.place(x=220, y=75)
+        self.attribute_choosen.place(x=470, y=165)
 
-        self.value_entry = Entry(self.canvas1, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
+        self.value_entry = Entry(self.canvas1, width=20, font=("Arial", 18), highlightbackground="black", highlightthickness=1, borderwidth=0)
         self.value_entry.insert(0, "Nhập giá trị")
         self.value_entry.bind("<Button-1>", self.clear_entry)
         self.value_entry.bind("<Return>", self.search)
-        self.value_entry.place(x=340, y=75)
+        self.value_entry.place(x=670, y=165)
 
         self.search_button_icon = ImageTk.PhotoImage(Image.open("images/search.png"))
         self.search_button = Button(self.canvas1, image=self.search_button_icon, highlightthickness=0, bd=0, borderwidth=0, command=self.search)
-        self.search_button.place(x=520, y=73)
+        self.search_button.place(x=990, y=160)
 
         style = ttk.Style()
         style.theme_use("clam")
+        style.configure("Treeview", font=("Arial", 10), rowheight=25)
 
-        self.table = ttk.Treeview(self.canvas1, height=10, show="headings", selectmode="browse")
+        self.table = ttk.Treeview(self.canvas1, height=15, show="headings", selectmode="browse")
         yscrollbar = ttk.Scrollbar(self.canvas1, orient=VERTICAL, command=self.table.yview)
-        yscrollbar.place(x=630, y=100, height=230)
+        yscrollbar.place(x=1163, y=210, height=404)
         self.table["columns"] = self.attributes_set
-        self.table.column("STT", minwidth=50, width=50, anchor="center", stretch=NO)
-        self.table.column("Họ và tên", minwidth=200, width=200, anchor="center", stretch=NO)
-        self.table.column("Mã SV", minwidth=100, width=100, anchor="center", stretch=NO)
-        self.table.column("GT", minwidth=50, width=50, anchor="center", stretch=NO)
-        self.table.column("Ngày sinh", minwidth=100, width=100, anchor="center", stretch=NO)
-        self.table.column("Số tiết vắng", minwidth=80, width=80, anchor="center", stretch=NO)
+        self.table.column("STT", minwidth=80, width=80, anchor="center", stretch=NO)
+        self.table.column("Họ và tên", minwidth=280, width=280, anchor="center", stretch=NO)
+        self.table.column("Mã SV", minwidth=200, width=200, anchor="center", stretch=NO)
+        self.table.column("Giới tính", minwidth=150, width=150, anchor="center", stretch=NO)
+        self.table.column("Ngày sinh", minwidth=200, width=200, anchor="center", stretch=NO)
+        self.table.column("Số tiết vắng", minwidth=150, width=150, anchor="center", stretch=NO)
         self.table.heading("STT", text="STT")
         self.table.heading("Họ và tên", text="Họ và tên")
         self.table.heading("Mã SV", text="Mã SV")
-        self.table.heading("GT", text="GT")
+        self.table.heading("Giới tính", text="GT")
         self.table.heading("Ngày sinh", text="Ngày sinh")
         self.table.heading("Số tiết vắng", text="Số tiết vắng")
-        self.table.place(x=50, y=100)
+        self.table.place(x=100, y=210)
         self.insert_data()
-
         self.table.bind("<Double-1>", self.show_student_info)
 
-        self.add_button = Button(self.canvas1, text="Thêm", width=8, font=("Arial", 11), bg="yellow", fg="black", command=self.open_add_student_window)
-        self.add_button.place(x=210, y=340)
-        self.modify_button = Button(self.canvas1, text="Sửa", width=8, font=("Arial", 11), bg="yellow", fg="black", command=self.open_modify_student_window)
-        self.modify_button.place(x=310, y=340)
-        self.delete_button = Button(self.canvas1, text="Xóa", width=8, font=("Arial", 11), bg="yellow", fg="black", command=self.remove_student)
-        self.delete_button.place(x=410, y=340)
+        self.add_button = Button(self.canvas1, text="Thêm", width=8, font=("Arial", 14), bg="yellow", fg="black", command=self.open_add_student_window)
+        self.add_button.place(x=480, y=630)
+        self.modify_button = Button(self.canvas1, text="Sửa", width=8, font=("Arial", 14), bg="yellow", fg="black", command=self.open_modify_student_window)
+        self.modify_button.place(x=590, y=630)
+        self.delete_button = Button(self.canvas1, text="Xóa", width=8, font=("Arial", 14), bg="yellow", fg="black", command=self.remove_student)
+        self.delete_button.place(x=700, y=630)
 
     def clear_entry(self, event):
         if self.value_entry.get() == "Nhập giá trị":
             self.value_entry.delete(0, END)
 
-    def search(self, event):
+    def search(self, event=None):
         attribute = self.attribute_choosen.current()
         value = self.value_entry.get()
         selections = []
@@ -137,19 +137,32 @@ class StudentListFrame(base.ParentFrame):
         self.absent_count_entry = Entry(self.new_window, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
         self.absent_count_entry.place(x=110, y=260)
 
+        def pick_image():
+            filename = filedialog.askopenfilename(filetypes=(("Image Files", "*.jpg"), ("Image Files", "*.png"), ("Image Files", "*.jpeg")))
+            if len(filename) != 0:
+                self.image_path_entry.delete(0, END)
+                self.image_path_entry.insert(0, filename)
+
+        self.pick_image_button = Button(self.new_window, text="Chọn ảnh", width=8, font=("Arial", 9), bg="#F32463", fg="white", command=pick_image)
+        self.pick_image_button.place(x=10, y=110)
+        self.image_path_entry = Entry(self.new_window, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
+        self.image_path_entry.place(x=110, y=110)
+
     def open_add_student_window(self):
         self.create_new_window("Thêm sinh viên")
         def _add_student():
             fullname = self.fullname_entry.get()
             id = self.id_entry.get()
+            gender = self.gender_entry.get()
             dob = self.dob_entry.get()
             absent_count = self.absent_count_entry.get()
-            if fullname == "" or id == "" or dob == "" or absent_count == "":
+            image_path = self.image_path_entry.get()
+            if fullname == "" or id == "" or gender == "" or dob == "" or absent_count == "" or image_path == "":
                 messagebox.showinfo("Thông báo", "Hãy nhập đầy đủ thông tin")
-            elif not valid_id(id):
+            elif not valid_id(int(id)):
                 messagebox.showinfo("Thông báo", "Mã sinh viên không hợp lệ hoặc đã tồn tại")
             else:
-                add_student(int(id), fullname, dob, int(absent_count))
+                add_student(int(id), fullname, gender, dob, int(absent_count), image_path)
                 self.new_window.destroy()
                 self.refresh_table()
 
@@ -161,24 +174,33 @@ class StudentListFrame(base.ParentFrame):
         if len(student) == 0:
             messagebox.showinfo("Thông báo", "Hãy chọn sinh viên cần sửa")
         else:
+            student = get_student(student[2])[0]
             self.create_new_window("Sửa sinh viên")
             self.fullname_entry.insert(0, student[1])
-            self.id_entry.insert(0, student[2])
-            self.gender_entry.insert(0, student[3])
-            self.dob_entry.insert(0, student[4])
-            self.absent_count_entry.insert(0, student[5])
+            self.id_entry.insert(0, student[0])
+            self.gender_entry.insert(0, student[2])
+            self.dob_entry.insert(0, student[3])
+            self.absent_count_entry.insert(0, student[4])
 
             def _modify_student():
+                old_id = student[0]
                 fullname = self.fullname_entry.get()
                 id = self.id_entry.get()
+                gender = self.gender_entry.get()
                 dob = self.dob_entry.get()
                 absent_count = self.absent_count_entry.get()
-                if fullname == "" or id == "" or dob == "" or absent_count == "":
+                image_data = student[5]
+                if self.image_path_entry.get() != "":
+                    image_path = self.image_path_entry.get()
+                    image_data = image_to_octet_string(image_path)
+
+                if fullname == "" or id == "" or gender == "" or dob == "" or absent_count == "":
                     messagebox.showinfo("Thông báo", "Hãy nhập đầy đủ thông tin")
-                elif not valid_id(id):
+                elif int(id) != int(old_id) and not valid_id(int(id)):
                     messagebox.showinfo("Thông báo", "Mã sinh viên không hợp lệ hoặc đã tồn tại")
                 else:
-                    update_student(int(id), fullname, dob, int(absent_count))
+                    update_student(int(old_id), int(id), fullname, gender, dob, int(absent_count), image_data)
+                    update_attendance(int(old_id), int(id))
                     self.new_window.destroy()
                     self.refresh_table()
 
@@ -187,6 +209,6 @@ class StudentListFrame(base.ParentFrame):
 
     def show_student_info(self, event):
         info = self.selected_student()
-        selected_student = Student(info[1], info[2], info[3], info[4], info[5])
+        selected_student_id = info[2]
         self.destroy()
-        student_info.StudentInfoFrame(self.master, selected_student).tkraise()
+        student_info.StudentInfoFrame(self.master, selected_student_id).tkraise()

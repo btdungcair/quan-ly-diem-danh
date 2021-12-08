@@ -1,7 +1,8 @@
 import time
-from sort_by_name import sort_by_name
+from helper import sort_by_name, image_to_octet_string
 import sqlite3
 from sqlite3 import Error
+import os
 
 def create_connection(db_file="test.db"):
     conn = None
@@ -37,18 +38,28 @@ def get_students_list():
 def get_sorted_students_list():
     return sort_by_name(get_students_list())
 
-def add_student(id, fullname, dob, absent_count):
+def get_student(id):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("INSERT INTO students (id, fullname, gender, dob, absent_count) VALUES (?, ?, ?, ?)", (id, fullname, dob, absent_count))
+    cur.execute("SELECT * FROM students WHERE id=?", (id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    return rows
+
+def add_student(id, fullname, gender, dob, absent_count, image_path):
+    conn = create_connection()
+    cur = conn.cursor()
+    image = image_to_octet_string(image_path)
+    cur.execute("INSERT INTO students (id, fullname, gender, dob, absent_count, image) VALUES (?, ?, ?, ?, ?, ?)", (id, fullname, gender, dob, absent_count, image))
     conn.commit()
     cur.close()
     conn.close()
 
-def update_student(id, fullname, gender, dob, absent_count):
+def update_student(old_id, id, fullname, gender, dob, absent_count, image_data):
     conn = create_connection()
     cur = conn.cursor()
-    cur.execute("UPDATE students SET id=?, fullname=?, gender=?, dob=?, absent_count=? WHERE id=?", (id, fullname, gender, dob, absent_count, id))
+    cur.execute("UPDATE students SET id=?, fullname=?, gender=?, dob=?, absent_count=?, image=? WHERE id=?", (id, fullname, gender, dob, absent_count, image_data, old_id))
     conn.commit()
     cur.close()
     conn.close()
@@ -62,7 +73,10 @@ def delete_student(id):
     conn.close()
 
 def valid_id(id):
-    id_list = get_students_list()[0]
+    student_list = get_students_list()
+    if len(student_list) == 0:
+        return True
+    id_list = [student[0] for student in student_list]
     return not id in id_list and id.isdigit() and len(str(id)) == 8
 
 # Table dates
@@ -85,7 +99,13 @@ def attendance(student_id_set, date=time.strftime("%d/%m/%Y")):
     cur.close()
     conn.close()
 
+def update_attendance(student_id, new_student_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE attendance SET student_id=? WHERE student_id=?", (new_student_id, student_id))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 # if __name__ == '__main__':
-#     lst = get_students_list()
-#     for i in lst:
-#         print(i)
+#     print(get_students_list())
