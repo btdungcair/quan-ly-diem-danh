@@ -1,5 +1,5 @@
 from tkinter import *
-from views import base, statistical, student_list
+from views import base, statistical, student_list, face_recognition
 from PIL import ImageTk, Image
 from controller import *
 
@@ -35,5 +35,9 @@ class MenuFrame(base.ParentFrame):
         elif frame_name == "student_frame":
             self.destroy()
             student_list.StudentListFrame(self.master).tkraise()
+        elif frame_name == "face_recognition_frame":
+            self.destroy()
+            face_recognition.FaceRecognitionFrame(self.master).tkraise()
         else:
-            return
+            self.destroy()
+            attendance.AttendanceFrame(self.master).tkraise()

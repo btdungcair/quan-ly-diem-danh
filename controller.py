@@ -72,13 +72,6 @@ def delete_student(id):
     cur.close()
     conn.close()
 
-def valid_id(id):
-    student_list = get_students_list()
-    if len(student_list) == 0:
-        return True
-    id_list = [student[0] for student in student_list]
-    return not id in id_list and id.isdigit() and len(str(id)) == 8
-
 # Table dates
 def add_date():
     date = time.strftime("%d/%m/%Y")

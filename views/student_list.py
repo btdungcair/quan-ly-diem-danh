@@ -1,9 +1,10 @@
 from tkinter import *
 from tkinter import messagebox, ttk, filedialog
+from tkcalendar import DateEntry
 from views import base, student_info
 from PIL import ImageTk, Image
 from controller import *
-from helper import image_to_octet_string
+from helper import image_to_octet_string, validate_student_id, validate_date
 
 class StudentListFrame(base.ParentFrame):
     def __init__(self, master):
@@ -124,13 +125,16 @@ class StudentListFrame(base.ParentFrame):
 
         self.gender_label = Label(self.new_window, text="Giới tính", font=("Arial", 11), bg="#D1D1D1")
         self.gender_label.place(x=10, y=200)
-        self.gender_entry = Entry(self.new_window, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
-        self.gender_entry.place(x=110, y=200)
+        self.gender_combobox = ttk.Combobox(self.new_window, textvariable="Giới tính", state="readonly", width=18, font=("Arial", 11))
+        self.gender_combobox["values"] = ("Nam", "Nữ")
+        self.gender_combobox.current()
+        self.gender_combobox.place(x=110, y=200)
 
         self.dob_label = Label(self.new_window, text="Ngày sinh", font=("Arial", 11), bg="#D1D1D1")
         self.dob_label.place(x=10, y=230)
-        self.dob_entry = Entry(self.new_window, width=20, font=("Arial", 11), highlightbackground="black", highlightthickness=1, borderwidth=0)
-        self.dob_entry.place(x=110, y=230)
+        self.select_dob = DateEntry(self.new_window, width=18, font=("Arial", 11), borderwidth=0, date_pattern="dd/mm/yyyy")
+        self.select_dob.delete(0, END)
+        self.select_dob.place(x=110, y=230)
 
         self.absent_count_label = Label(self.new_window, text="Số tiết vắng", font=("Arial", 11), bg="#D1D1D1")
         self.absent_count_label.place(x=10, y=260)
@@ -138,7 +142,7 @@ class StudentListFrame(base.ParentFrame):
         self.absent_count_entry.place(x=110, y=260)
 
         def pick_image():
-            filename = filedialog.askopenfilename(filetypes=(("Image Files", "*.jpg"), ("Image Files", "*.png"), ("Image Files", "*.jpeg")))
+            filename = filedialog.askopenfilename(filetypes=(("Image Files", "*.jpg"), ("Image Files", "*.png"), ("Image Files", "*.jpeg"), ("All Files", "*.*")))
             if len(filename) != 0:
                 self.image_path_entry.delete(0, END)
                 self.image_path_entry.insert(0, filename)
@@ -150,17 +154,22 @@ class StudentListFrame(base.ParentFrame):
 
     def open_add_student_window(self):
         self.create_new_window("Thêm sinh viên")
+        self.absent_count_entry.insert(0, "0")
         def _add_student():
             fullname = self.fullname_entry.get()
             id = self.id_entry.get()
-            gender = self.gender_entry.get()
-            dob = self.dob_entry.get()
+            gender = self.gender_combobox.get()
+            dob = self.select_dob.get()
             absent_count = self.absent_count_entry.get()
             image_path = self.image_path_entry.get()
-            if fullname == "" or id == "" or gender == "" or dob == "" or absent_count == "" or image_path == "":
+            if fullname == "" or image_path == "" or id == "" or dob == "" or absent_count == "" or gender == "":
                 messagebox.showinfo("Thông báo", "Hãy nhập đầy đủ thông tin")
-            elif not valid_id(int(id)):
+            elif not validate_student_id(id):
                 messagebox.showinfo("Thông báo", "Mã sinh viên không hợp lệ hoặc đã tồn tại")
+            elif not validate_date(dob):
+                messagebox.showinfo("Thông báo", "Ngày sinh không hợp lệ\nNgày sinh phải có dạng dd/mm/yyyy")
+            elif not absent_count.isdigit():
+                messagebox.showinfo("Thông báo", "Số tiết vắng phải là số. VD: 2")
             else:
                 add_student(int(id), fullname, gender, dob, int(absent_count), image_path)
                 self.new_window.destroy()
@@ -178,26 +187,30 @@ class StudentListFrame(base.ParentFrame):
             self.create_new_window("Sửa sinh viên")
             self.fullname_entry.insert(0, student[1])
             self.id_entry.insert(0, student[0])
-            self.gender_entry.insert(0, student[2])
-            self.dob_entry.insert(0, student[3])
+            self.gender_combobox.set(student[2])
+            self.select_dob.insert(0, student[3])
             self.absent_count_entry.insert(0, student[4])
 
             def _modify_student():
                 old_id = student[0]
                 fullname = self.fullname_entry.get()
                 id = self.id_entry.get()
-                gender = self.gender_entry.get()
-                dob = self.dob_entry.get()
+                gender = self.gender_combobox.get()
+                dob = self.select_dob.get()
                 absent_count = self.absent_count_entry.get()
                 image_data = student[5]
                 if self.image_path_entry.get() != "":
                     image_path = self.image_path_entry.get()
                     image_data = image_to_octet_string(image_path)
 
-                if fullname == "" or id == "" or gender == "" or dob == "" or absent_count == "":
+                if fullname == "" or id == "" or dob == "" or absent_count == "":
                     messagebox.showinfo("Thông báo", "Hãy nhập đầy đủ thông tin")
-                elif int(id) != int(old_id) and not valid_id(int(id)):
+                elif int(id) != int(old_id) and not validate_student_id(id):
                     messagebox.showinfo("Thông báo", "Mã sinh viên không hợp lệ hoặc đã tồn tại")
+                elif not validate_date(dob):
+                    messagebox.showinfo("Thông báo", "Ngày sinh không hợp lệ\nNgày sinh phải có dạng dd/mm/yyyy")
+                elif not absent_count.isdigit():
+                    messagebox.showinfo("Thông báo", "Số tiết vắng phải là số. VD: 2")
                 else:
                     update_student(int(old_id), int(id), fullname, gender, dob, int(absent_count), image_data)
                     update_attendance(int(old_id), int(id))
