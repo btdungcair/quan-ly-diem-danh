@@ -2,6 +2,7 @@ import locale
 import io
 import re
 import controller
+import pandas as pd
 from PIL import Image
 
 def getName(s):
@@ -47,6 +48,10 @@ def validate_date(date_string):
     else:
         return False
 
-# if __name__ == '__main__':
-#     print(validate_student_id('19000470'))
-#     print(validate_student_id('1a900040'))
+def export_csv_file(file_path, data, columns_list):
+    df = pd.DataFrame(data, columns=columns_list)
+    df.to_csv(file_path, index=False, header=True)
+
+def export_xlsx_file(file_path, data, columns_list):
+    df = pd.DataFrame(data, columns=columns_list)
+    df.to_excel(file_path, index=False, header=True)

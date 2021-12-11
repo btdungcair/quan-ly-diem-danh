@@ -1,8 +1,7 @@
 import time
-from helper import sort_by_name, image_to_octet_string
+import helper
 import sqlite3
 from sqlite3 import Error
-import os
 
 def create_connection(db_file="test.db"):
     conn = None
@@ -36,7 +35,7 @@ def get_students_list():
     return rows
 
 def get_sorted_students_list():
-    return sort_by_name(get_students_list())
+    return helper.sort_by_name(get_students_list())
 
 def get_student(id):
     conn = create_connection()
@@ -50,7 +49,7 @@ def get_student(id):
 def add_student(id, fullname, gender, dob, absent_count, image_path):
     conn = create_connection()
     cur = conn.cursor()
-    image = image_to_octet_string(image_path)
+    image = helper.image_to_octet_string(image_path)
     cur.execute("INSERT INTO students (id, fullname, gender, dob, absent_count, image) VALUES (?, ?, ?, ?, ?, ?)", (id, fullname, gender, dob, absent_count, image))
     conn.commit()
     cur.close()
@@ -64,6 +63,14 @@ def update_student(old_id, id, fullname, gender, dob, absent_count, image_data):
     cur.close()
     conn.close()
 
+def update_absent_count(id):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE students SET absent_count=absent_count+1 WHERE id=?", (id,))
+    conn.commit()
+    cur.close()
+    conn.close()
+
 def delete_student(id):
     conn = create_connection()
     cur = conn.cursor()
@@ -73,14 +80,23 @@ def delete_student(id):
     conn.close()
 
 # Table dates
-def add_date():
-    date = time.strftime("%d/%m/%Y")
+def add_date(date=time.strftime("%d/%m/%Y")):
     conn = create_connection()
     cur = conn.cursor()
     cur.execute("INSERT INTO dates (date) VALUES (?)", (date,))
     conn.commit()
     cur.close()
     conn.close()
+
+def get_dates_list():
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM dates")
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    dates = [date[0] for date in rows]
+    return sorted(dates, key=lambda date: time.strptime(date, "%d/%m/%Y"))
 
 # Table attendance
 def attendance(student_id_set, date=time.strftime("%d/%m/%Y")):
@@ -91,6 +107,9 @@ def attendance(student_id_set, date=time.strftime("%d/%m/%Y")):
     conn.commit()
     cur.close()
     conn.close()
+    absentee_list = [student for student in get_students_list() if student[0] not in student_id_set]
+    for student in absentee_list:
+        update_absent_count(student[0])
 
 def update_attendance(student_id, new_student_id):
     conn = create_connection()
@@ -100,5 +119,25 @@ def update_attendance(student_id, new_student_id):
     cur.close()
     conn.close()
 
-# if __name__ == '__main__':
-#     print(get_students_list())
+def get_attendance(student_id):
+    conn = create_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT date FROM attendance WHERE student_id=?", (student_id,))
+    rows = cur.fetchall()
+    cur.close()
+    conn.close()
+    dates = [date[0] for date in rows]
+    dates = sorted(dates, key=lambda date: time.strptime(date, "%d/%m/%Y"))
+    res = []
+    for date in get_dates_list():
+        if date in dates:
+            res.append("x")
+        else:
+            res.append("vắng")
+    return res
+
+if __name__ == "__main__":
+    date = "23/12/2021"
+    add_date(date)
+    attendance({18000267, 18000321, 19000345, 20000145}, date)
+    print(get_attendance(19000470))

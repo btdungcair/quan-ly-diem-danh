@@ -49,12 +49,8 @@ class StudentListFrame(base.ParentFrame):
         self.table.column("Giới tính", minwidth=150, width=150, anchor="center", stretch=NO)
         self.table.column("Ngày sinh", minwidth=200, width=200, anchor="center", stretch=NO)
         self.table.column("Số tiết vắng", minwidth=150, width=150, anchor="center", stretch=NO)
-        self.table.heading("STT", text="STT")
-        self.table.heading("Họ và tên", text="Họ và tên")
-        self.table.heading("Mã SV", text="Mã SV")
-        self.table.heading("Giới tính", text="GT")
-        self.table.heading("Ngày sinh", text="Ngày sinh")
-        self.table.heading("Số tiết vắng", text="Số tiết vắng")
+        for col in self.table['columns']:
+            self.table.heading(col, text=f"{col}", anchor=CENTER)
         self.table.place(x=100, y=210)
         self.insert_data()
         self.table.bind("<Double-1>", self.show_student_info)
@@ -74,16 +70,17 @@ class StudentListFrame(base.ParentFrame):
         attribute = self.attribute_choosen.current()
         value = self.value_entry.get()
         selections = []
-        if not attribute == "Thuộc tính" and not len(value) == 0:
+        print(attribute)
+        if attribute != -1 and not len(value) == 0:
             for child in self.table.get_children():
                 if value.lower() in str(self.table.item(child)['values'][attribute]).lower():
                     selections.append(child)
             self.table.selection_set(selections)
 
     def insert_data(self):
-        student_list = sort_by_name(get_students_list())
+        student_list = get_sorted_students_list()
         for i in range(len(student_list)):
-            self.table.insert("", "end", values=(i+1, student_list[i][1], student_list[i][0], student_list[i][2], student_list[i][3], student_list[i][4]))
+            self.table.insert("", "end", values=[i+1, student_list[i][1], student_list[i][0], student_list[i][2], student_list[i][3], student_list[i][4]])
 
     def refresh_table(self):
         self.table.delete(*self.table.get_children())
