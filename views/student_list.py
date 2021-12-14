@@ -70,7 +70,6 @@ class StudentListFrame(base.ParentFrame):
         attribute = self.attribute_choosen.current()
         value = self.value_entry.get()
         selections = []
-        print(attribute)
         if attribute != -1 and not len(value) == 0:
             for child in self.table.get_children():
                 if value.lower() in str(self.table.item(child)['values'][attribute]).lower():
